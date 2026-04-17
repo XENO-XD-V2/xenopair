@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API - WhatsApp Session Generator</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: monospace;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .container {
+            border: 1px solid #fff;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+        input {
+            background: #000;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 1rem;
+            outline: none;
+        }
+        input:focus {
+            background: #111;
+        }
+        button {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            font-family: monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #ccc;
+        }
+        button:disabled {
+            background: #333;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px dashed #fff;
+            background-color: #0a0a0a;
+        }
+        .code-display {
+            font-size: 2rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .error {
+            color: #fff;
+            background: #330000;
+            border: 1px solid #ff0000;
+            padding: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>[ XenoExe Backend API ]</h1>
+        <div class="input-group">
+            <label>>> Enter target phone number (with country code):</label>
+            <input type="text" id="phoneInput" placeholder="919876543210" autocomplete="off">
+        </div>
+        <button id="generateBtn" onclick="generateCode()">Execute Request</button>
+
+        <div class="error" id="errorMsg"></div>
+
+        <div class="result-box" id="resultBox">
+            <div>STATUS: SUCCESS</div>
+            <div>[PAIRING CODE]</div>
+            <div class="code-display" id="codeDisplay">----</div>
+            <div style="color: #bbb; font-size: 0.85em;">> Link device within 60s.<br>> Creds will be sent via WhatsApp.</div>
+        </div>
+    </div>
+
+    <script>
+        async function generateCode() {
+            const input = document.getElementById('phoneInput').value.trim();
+            const btn = document.getElementById('generateBtn');
+            const resultBox = document.getElementById('resultBox');
+            const codeDisplay = document.getElementById('codeDisplay');
+            const errorMsg = document.getElementById('errorMsg');
+
+            if(!input) {
+                errorMsg.innerText = "Error: Input required";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            errorMsg.style.display = "none";
+            resultBox.style.display = "none";
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            try {
+                const response = await fetch(`/pair?number=${encodeURIComponent(input)}`);
+                const data = await response.json();
+
+                if (response.ok && data.code) {
+                    codeDisplay.innerText = data.code;
+                    resultBox.style.display = "block";
+                } else {
+                    errorMsg.innerText = data.error || "Error: Failed to process pairing";
+                    errorMsg.style.display = "block";
+                }
+            } catch (err) {
+                errorMsg.innerText = "System Error: Backend unreachable";
+                errorMsg.style.display = "block";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Execute Request";
+            }
+        }
+    </script>
+</body>
+</html>
